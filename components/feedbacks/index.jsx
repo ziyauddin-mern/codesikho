@@ -1,9 +1,22 @@
-"use client";
-
 import Layout from "../shared/layout";
 import "./feedbacks.css";
+import useSWR, { mutate } from "swr";
+import axios from "axios";
+axios.defaults.baseURL = "http://localhost:8080";
 
-const FeedBacks = () => {
+const fetcher = async (url) => {
+  try {
+    const { data } = await axios.get(url);
+    return data;
+  } catch (err) {
+    throw new Error(err);
+  }
+};
+
+const FeedBacks = async () => {
+  const { data, error, isLoading } = useSWR("/feedbacks", fetcher);
+  console.log(data);
+
   return (
     <Layout>
       <div className="md:w-7/12 mx-auto py-12">
