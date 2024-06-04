@@ -1,0 +1,18 @@
+.hover-line {
+  position: relative;
+}
+
+.hover-line::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  background: #28346c;
+  left: 0;
+  bottom: -5px;
+  transition: 0.3s;
+}
+
+.hover-line:hover::after {
+  width: 100%;
+}

@@ -1,0 +1,7 @@
+.courses-hover {
+  box-shadow: 4px 10px 16px gray;
+}
+
+.courses-hover:hover .course-link {
+  bottom: -60px;
+}

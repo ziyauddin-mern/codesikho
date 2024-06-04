@@ -1,0 +1,7 @@
+.plan-hover:hover {
+  box-shadow: 2px 12px 12px gray;
+}
+
+.plan-hover:hover h1 {
+  color: #f8c01b;
+}
