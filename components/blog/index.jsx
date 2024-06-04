@@ -115,6 +115,7 @@ const Blog = () => {
           <div className="flex flex-col gap-2 py-2">
             {categories.map((category, categoryIndex) => (
               <Link
+                key={categoryIndex}
                 href={category.url}
                 className="hover:bg-[#3F51B5] px-2 py-1 text-gray-600 hover:text-white"
               >

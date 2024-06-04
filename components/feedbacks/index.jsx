@@ -16,6 +16,7 @@ const FeedBacks = () => {
             .fill()
             .map((feedback, index) => (
               <img
+                key={index}
                 src={`/images/feedbacks/${index + 1}.jpg`}
                 className="w-11/12 mx-auto animate__animated animate__zoomIn"
               />
