@@ -1,7 +1,8 @@
+"use client";
 import Layout from "../shared/layout";
 import "./feedbacks.css";
 
-const FeedBacks = () => {
+const FeedBacks = ({ allData }) => {
   return (
     <Layout>
       <div className="md:w-7/12 mx-auto py-12">
@@ -10,12 +11,12 @@ const FeedBacks = () => {
         </h1>
         <hr className="w-16 border border-black mx-auto" />
         <div className="grid md:grid-cols-3 gap-y-12 py-12 px-24">
-          {Array(18)
-            .fill()
-            .map((feedback, index) => (
+          {allData &&
+            allData.map((data, dataIndex) => (
               <img
-                key={index}
-                src={`/images/feedbacks/${index + 1}.jpg`}
+                src={`http://localhost:8080/${data.path}`}
+                alt={data.path}
+                key={dataIndex}
                 className="w-11/12 mx-auto animate__animated animate__zoomIn"
               />
             ))}
