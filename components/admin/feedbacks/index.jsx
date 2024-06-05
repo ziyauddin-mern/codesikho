@@ -82,6 +82,7 @@ const FeedBacks = () => {
                   src={`http://localhost:8080/${pic.path}`}
                   alt={pic.path}
                   className=" mx-auto"
+                  key={index}
                 />
               ))}
           </div>
