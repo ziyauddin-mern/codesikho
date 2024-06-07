@@ -13,7 +13,7 @@ const AdminLayout = ({ children, selecKey = null }) => {
       label: (
         <Link
           href="/admin/feedbacks"
-          className="text-lg font-semibold flex items-center gap-2"
+          className="font-bold flex items-center gap-2"
         >
           <i className="ri-user-3-line"></i>
           <span>FeedBacks</span>
@@ -25,7 +25,7 @@ const AdminLayout = ({ children, selecKey = null }) => {
       label: (
         <Link
           href="/admin/courses"
-          className="text-lg font-semibold flex items-center gap-2"
+          className="font-bold flex items-center gap-2"
         >
           <i className="ri-code-box-line"></i>
           <span>Courses</span>
@@ -35,15 +35,24 @@ const AdminLayout = ({ children, selecKey = null }) => {
     },
     {
       label: (
-        <Link
-          href="/admin/blog"
-          className="text-lg font-semibold flex items-center gap-2"
-        >
+        <Link href="/admin/blog" className="font-bold flex items-center gap-2">
           <i className="ri-blogger-line"></i>
-          <span>FeedBacks</span>
+          <span>Blog</span>
         </Link>
       ),
       key: "blog",
+    },
+    {
+      label: (
+        <Link
+          href="/admin/announcements"
+          className="font-bold flex items-center gap-2"
+        >
+          <i className="ri-megaphone-line"></i>
+          <span>Announcements</span>
+        </Link>
+      ),
+      key: "announcements",
     },
   ];
   return (
