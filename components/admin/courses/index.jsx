@@ -184,7 +184,7 @@ const Courses = () => {
             data.map((course, courseIndex) => (
               <div
                 key={courseIndex}
-                className="bg-white rounded space-y-2 shadow-lg"
+                className="bg-white rounded space-y-2 shadow-lg animate__animated animate__fadeIn"
               >
                 {course.thumbnail ? (
                   <img
