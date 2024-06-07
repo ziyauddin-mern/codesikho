@@ -88,7 +88,7 @@ const FeedBacks = () => {
                 <img
                   src={`http://localhost:8080/${pic.screenshot}`}
                   alt={pic.path}
-                  className="mx-auto w-[300px] h-[200px]"
+                  className="mx-auto w-[300px] h-[200px] animate__animated animate__fadeIn"
                   key={index}
                 />
               ))}
