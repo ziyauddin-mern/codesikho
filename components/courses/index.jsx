@@ -4,6 +4,9 @@ import { useState } from "react";
 import Link from "next/link";
 import Layout from "../shared/layout";
 import "./courses.css";
+import useSWR from "swr";
+import axios from "axios";
+axios.defaults.baseURL = "http://localhost:8080";
 
 const cats = [
   "back end curses",
@@ -160,6 +163,16 @@ const courses = [
 ];
 
 const Courses = () => {
+  const fetcher = async (url) => {
+    try {
+      const { data } = await axios.get("/courses");
+      console.log(data);
+    } catch (err) {
+      throw new Error(err.message);
+    }
+  };
+  const { data, error, isLoading } = useSWR("/courses", fetcher);
+
   const [catList, setCatList] = useState(false);
 
   return (
@@ -170,7 +183,7 @@ const Courses = () => {
           onClick={() => setCatList(!catList)}
         >
           <span>Category</span>
-          <i class="ri-arrow-down-s-fill"></i>
+          <i className="ri-arrow-down-s-fill"></i>
         </button>
         <div className="relative">
           {catList ? (

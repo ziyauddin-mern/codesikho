@@ -23,22 +23,29 @@ const FeedBacks = () => {
 
   const onUpload = async (e) => {
     e.preventDefault();
-    setSubmit(true);
-    try {
-      const formData = new FormData();
-      formData.append("feedbacks_input", file);
-      const { data, isLoading } = await axios.post("/feedbacks", formData);
-      mutate("/feedbacks");
-    } catch (err) {
-      console.log(err);
-    } finally {
-      setSubmit(false);
-      e.target.reset();
+
+    if (file) {
+      const orignalfilename = file.name;
+      const updatedFilename = orignalfilename + ".feedbacks";
+      const newFile = new File([file], updatedFilename, { type: file.type });
+      setSubmit(true);
+      try {
+        const formData = new FormData();
+        formData.append("upload_file", newFile);
+        const { data, isLoading } = await axios.post("/storage", formData);
+        await axios.post("/feedbacks", { screenshot: data.path });
+        mutate("/feedbacks");
+      } catch (err) {
+        console.log(err);
+      } finally {
+        setSubmit(false);
+        e.target.reset();
+      }
     }
   };
 
   return (
-    <AdminLayout>
+    <AdminLayout selecKey="feedbacks">
       <div>
         <h1 className="text-center text-2xl font-bold">
           Please Upload your FeedBacks screenshots.
@@ -48,7 +55,7 @@ const FeedBacks = () => {
             <div className="relative h-[200px] bg-white border-2 border-dotted shadow-xl rounded-xl flex justify-center items-center flex-col border-gray-500 hover:border-blue-500 duration-1000 gap-2">
               <input
                 type="file"
-                accept="/image/*"
+                accept="image/*"
                 id="feed-file"
                 required
                 className="border absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer"
@@ -75,14 +82,13 @@ const FeedBacks = () => {
         </div>
 
         <div className="mt-12 ">
-          <div className="grid grid-cols-8 w-full gap-8">
+          <div className="grid md:grid-cols-5 w-10/12 mx-auto gap-8">
             {data &&
               data.map((pic, index) => (
                 <img
-                  src={`http://localhost:8080/${pic.path}`}
+                  src={`http://localhost:8080/${pic.screenshot}`}
                   alt={pic.path}
-                  className=" mx-auto"
-                  key={index}
+                  className="mx-auto w-[300px] h-[200px]"
                 />
               ))}
           </div>
