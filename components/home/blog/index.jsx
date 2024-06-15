@@ -1,79 +1,30 @@
+"use client";
 import Link from "next/link";
 import "./blog.css";
+import useSWR from "swr";
+import axios from "axios";
+import { Skeleton } from "antd";
+import moment from "moment";
+let server = "http://localhost:8080";
+axios.defaults.baseURL = server;
 
-const blogs = [
-  {
-    pic: "/images/home/blog/1.jpg",
-    cat: (
-      <Link className="text-[#3F4C9A] font-semibold text-xs" href="#">
-        Web Dev
-      </Link>
-    ),
-    date: "24th Sept,2020",
-    title: (
-      <Link
-        href="/blog/blog-description"
-        className="text-[#3F4C9A] text-xl font-bold"
-      >
-        Node.js websocket (Chat app)
-      </Link>
-    ),
-    desc: "In this video we will discuss and check that how to use websockets ...",
-    tutor: (
-      <Link href="#" className="text-[#3F4C9A]">
-        Shagun Garg
-      </Link>
-    ),
-  },
-  {
-    pic: "/images/home/blog/2.jpg",
-    cat: (
-      <Link className="text-[#3F4C9A] font-semibold text-xs" href="#">
-        Web Design
-      </Link>
-    ),
-    date: "9th Jul,2020",
-    title: (
-      <Link
-        href="/blog/blog-description"
-        className="text-[#3F4C9A] text-xl font-bold"
-      >
-        Upload video to youtube from Angular 9
-      </Link>
-    ),
-    desc: "we will see how to upload video from angular 9 to youtube in Hindi. in youtube history...",
-    tutor: (
-      <Link href="#" className="text-[#3F4C9A]">
-        Shagun Garg
-      </Link>
-    ),
-  },
-  {
-    pic: "/images/home/blog/3.jpg",
-    cat: (
-      <Link className="text-[#3F4C9A] font-semibold text-xs" href="#">
-        Web Design
-      </Link>
-    ),
-    date: "27th Jul,2018",
-    title: (
-      <Link
-        href="/blog/blog-description"
-        className="text-[#3F4C9A] text-xl font-bold"
-      >
-        Angular 9 common header and footer
-      </Link>
-    ),
-    desc: "we will see how to use common header and footer in angular 9 with best practises and along with...",
-    tutor: (
-      <Link href="#" className="text-[#3F4C9A]">
-        Shagun Garg
-      </Link>
-    ),
-  },
-];
+const fetcher = async (url) => {
+  try {
+    const { data } = await axios.get(url);
+    return data;
+  } catch (err) {
+    return err;
+  }
+};
 
 const Blog = () => {
+  const { data } = useSWR("/blogs/0/3", fetcher);
+  if (!data)
+    return (
+      <div className="md:w-7/12 mx-auto">
+        <Skeleton active />
+      </div>
+    );
   return (
     <div
       className="md:bg-[url('/images/home/blog/bg.png')] bg-right-top bg-no-repeat md:mx-12 mb-12"
@@ -88,32 +39,50 @@ const Blog = () => {
         </div>
 
         <div className="space-y-8">
-          {blogs.map((blog, blogIndex) => (
-            <div key={blogIndex} className="border blog rounded-xl">
-              <img
-                src={blog.pic}
-                alt={blog.pic}
-                className="hover:contrast-50 duration-300"
-              />
-              <div className="flex flex-col items-center gap-8 py-12">
-                <h1>
-                  {blog.cat}
-                  <span className="text-lg text-gray-400 ml-6">
-                    {blog.date}
-                  </span>
-                </h1>
+          {data.map(
+            (blog, blogIndex) =>
+              blog.thumbnail && (
+                <div key={blogIndex} className="border blog rounded-xl">
+                  <img
+                    src={`${server}/${blog.thumbnail}`}
+                    alt={blog.thumbnail}
+                    className="hover:contrast-50 duration-300"
+                  />
+                  <div className="flex flex-col items-center gap-8 py-12 px-8">
+                    <h1>
+                      <span className="text-lg text-gray-400 ml-6">
+                        {moment(blog.createdAt).format("Do MMM, YYYY h:mm A")}
+                      </span>
+                    </h1>
 
-                {blog.title}
-                <p className="font-semibold text-gray-400">{blog.desc}</p>
-                <p className="text-xs font-semibold">By {blog.tutor}</p>
-              </div>
-            </div>
-          ))}
+                    <Link
+                      href={`/blogs/${blog.title.replaceAll(" ", "-")}?item=${
+                        blog._id
+                      }`}
+                      className="text-2xl font-bold text-blue-800 hover:text-blue-600 duration-300"
+                    >
+                      {blog.title}
+                    </Link>
+                    <p className="font-semibold text-sm text-gray-400 text-center">
+                      {blog.desc.length < 70
+                        ? blog.desc
+                        : `${blog.desc.substring(0, 70)}...`}
+                    </p>
+                    <p className="text-xs text-gray-600 font-semibold">
+                      <span>By</span>
+                      <span className="text-blue-800 text-sm pl-1 cursor-pointer font-bold">
+                        {blog.blogger}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+              )
+          )}
         </div>
 
         <div className="flex justify-center">
           <Link
-            href="#"
+            href="/blogs"
             className="bg-[#4D7CC7] px-16 mt-12 text-white rounded-full border-2 py-3 font-bold hover:bg-white hover:text-[#4D7CC7] hover:border-[#4D7CC7]  duration-500 text-lg"
           >
             All Blogs

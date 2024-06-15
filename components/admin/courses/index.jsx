@@ -15,7 +15,7 @@ const Courses = () => {
       throw new Error(err.message);
     }
   };
-  const { data, error, isLoading } = useSWR("/courses", fetcher);
+  const { data, error, isLoading } = useSWR("/courses/0/all", fetcher);
   const [submit, setSubmit] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [courseForm] = Form.useForm();
@@ -27,7 +27,7 @@ const Courses = () => {
       message.success(
         "Success ! If you want to publish your product then first upload the photo. Thank you."
       );
-      mutate("/courses");
+      mutate("/courses/0/all");
     } catch (err) {
       message.error("Unable to create Courses, please try after some time.");
     } finally {
@@ -49,7 +49,7 @@ const Courses = () => {
         formData.append("upload_file", newFile);
         const { data } = await axios.post("/storage", formData);
         await axios.put(`/courses/${id}`, { thumbnail: data.path });
-        mutate("/courses");
+        mutate("/courses/0/all");
       } catch (err) {
         console.log(err.messages);
       } finally {
@@ -194,7 +194,7 @@ const Courses = () => {
                 ) : uploading ? (
                   <div className="w-full h-[200px] bg-gray-200 border flex items-center justify-center">
                     <span className="animate-spin text-8xl text-gray-400">
-                      <i class="ri-loader-4-line"></i>
+                      <i class="ri-loader-2-line"></i>
                     </span>
                   </div>
                 ) : (

@@ -1,4 +1,4 @@
-import BlogDesc from "@/components/blog-description";
+import BlogDesc from "@/components/blog/slug";
 
 export const metadata = {
   title: "Blog Description",

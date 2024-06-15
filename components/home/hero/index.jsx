@@ -21,7 +21,7 @@ const Hero = () => {
           className="h-full"
         >
           <SwiperSlide>
-            <Link href="#">
+            <Link href="/courses">
               <img
                 src="/images/home/hero/1.jpg"
                 alt="hero1"
@@ -31,7 +31,7 @@ const Hero = () => {
           </SwiperSlide>
 
           <SwiperSlide>
-            <Link href="#">
+            <Link href="/courses">
               <img
                 src="/images/home/hero/2.png"
                 alt="hero1"

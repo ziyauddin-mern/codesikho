@@ -1,6 +1,12 @@
 "use client";
+import { useEffect, useState } from "react";
+import { Form, Input, Modal, Select, message } from "antd";
+import countries from "@/components/json/CountryCodes";
 import Link from "next/link";
 import "./layout.css";
+import axios from "axios";
+const server = "http://localhost:8080";
+axios.defaults.baseURL = server;
 
 const features = [
   {
@@ -57,7 +63,112 @@ const footerMenus = [
   },
 ];
 
+const checkAuth = async (session) => {
+  if (session) {
+    try {
+      const { data: isLogged } = await axios.post("/token/verify", {
+        token: session,
+      });
+      return isLogged;
+    } catch (err) {
+      localStorage.removeItem("auth");
+      return null;
+    }
+  }
+};
+
 const Layout = ({ children, carticon = false }) => {
+  const [submitLoginForm] = Form.useForm();
+
+  const [isAuth, setIsAuth] = useState(null);
+
+  useEffect(() => {
+    const tmp = async () => {
+      const session = localStorage.getItem("auth");
+      if (session) {
+        const isLogged = await checkAuth(session);
+        setIsAuth(isLogged);
+      } else {
+        localStorage.removeItem("auth");
+      }
+    };
+    tmp();
+  }, []);
+  const [modalState, setModalState] = useState(false);
+  const [loginForm, setLoginForm] = useState(true);
+  const [phonePrefix, setPhonePrefix] = useState("+91");
+  const [logReq, setLogReq] = useState(false);
+  const [signupReq, setSignupReq] = useState(false);
+  const [accountPanel, setAccountPanel] = useState(false);
+
+  const onCountry = (value) => {
+    setPhonePrefix(value);
+  };
+
+  const filterOption = (input, option) =>
+    (option?.label ?? "").toLowerCase().includes(input.toLowerCase());
+
+  const prefixSelector = (
+    <Form.Item
+      noStyle
+      name="country_code"
+      rules={[{ required: true, message: "Please select your contry" }]}
+    >
+      <Select
+        style={{
+          width: 70,
+        }}
+        showSearch
+        placeholder="Select a person"
+        optionFilterProp="children"
+        onChange={onCountry}
+        filterOption={filterOption}
+        options={countries}
+      />
+    </Form.Item>
+  );
+
+  const onSignup = async (values) => {
+    values.mobile = values.country_code + values.mobile;
+    setSignupReq(true);
+    try {
+      const { data } = await axios.post("/auth/signup", values);
+      message.success("Success.");
+      localStorage.setItem("auth", data.token);
+      let isLogged = await checkAuth(localStorage.getItem("auth"));
+      setIsAuth(isLogged);
+      setModalState(false);
+      setLoginForm(true);
+    } catch (err) {
+      message.error(err.response.data.message);
+    } finally {
+      setSignupReq(false);
+    }
+  };
+
+  const onLogin = async (values) => {
+    const { login_email: email, login_password: password } = values;
+    setLogReq(true);
+    try {
+      const { data } = await axios.post("/auth/login", { email, password });
+      message.success("Success.");
+      localStorage.setItem("auth", data.token);
+      let isLogged = await checkAuth(localStorage.getItem("auth"));
+      setIsAuth(isLogged);
+      submitLoginForm.resetFields();
+      setModalState(false);
+    } catch (err) {
+      //message.error(err.response.data.message);
+    } finally {
+      setLogReq(false);
+    }
+  };
+
+  const logout = () => {
+    localStorage.clear();
+    setIsAuth(null);
+  };
+
   return (
     <>
       {/* header */}
@@ -94,7 +205,10 @@ const Layout = ({ children, carticon = false }) => {
             >
               Courses
             </Link>
-            <Link href="/blog" className="hover-line md:text-start text-center">
+            <Link
+              href="/blogs"
+              className="hover-line md:text-start text-center"
+            >
               Blog
             </Link>
             <Link
@@ -115,9 +229,48 @@ const Layout = ({ children, carticon = false }) => {
               </button>
             )}
 
-            <button className="bg-[#3F51B5] text-white px-12 rounded py-3 hover:bg-[#28346C] duration-300 w-fit mx-auto">
-              Login
-            </button>
+            {isAuth ? (
+              <div
+                className="flex  items-center cursor-pointer relative justify-center"
+                onClick={() => setAccountPanel(!accountPanel)}
+              >
+                <div className="text-2xl font-bold bg-[#FCBB1F] w-10 h-10 border-2 hover:border-blue-500 duration-300 rounded-full flex items-center justify-center capitalize">
+                  {isAuth.fullname.substring(0, 1)}
+                </div>
+                <div>
+                  <i className="ri-arrow-down-s-fill"></i>
+                </div>
+                {accountPanel && (
+                  <div className="bg-[#3F51B5] py-2 shadow absolute top-[100%] z-10 md:right-0 font-bold rounded text-md capitalize text-white flex flex-col w-[150px]">
+                    <Link
+                      href="/dashboard/mycourses"
+                      className="hover:bg-white hover:text-[#3F51B5] px-4 py-2"
+                    >
+                      my purchases
+                    </Link>
+                    <Link
+                      href="/dashboard/myprofile"
+                      className="hover:bg-white hover:text-[#3F51B5] px-4 py-2"
+                    >
+                      my profile
+                    </Link>
+                    <button
+                      onClick={logout}
+                      className="hover:bg-white hover:text-[#3F51B5] px-4 py-2 text-left"
+                    >
+                      log out
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                className="bg-[#3F51B5] text-white px-12 rounded py-3 hover:bg-[#28346C] duration-300 w-fit mx-auto"
+                onClick={() => setModalState(true)}
+              >
+                Login
+              </button>
+            )}
           </div>
         </nav>
       </header>
@@ -252,6 +405,179 @@ const Layout = ({ children, carticon = false }) => {
           </div>
         </div>
       </footer>
+
+      <Modal
+        open={modalState}
+        onCancel={() => setModalState(false)}
+        footer={null}
+        width={450}
+        className="no-border-radius"
+      >
+        {loginForm ? (
+          <div>
+            <Form form={submitLoginForm} onFinish={onLogin}>
+              <p className="font-bold text-lg">Log in to CodeSikho</p>
+              <div className="mt-4">
+                <Form.Item
+                  name="login_email"
+                  rules={[
+                    {
+                      required: true,
+                      type: "email",
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Email Address"
+                    size="large"
+                    className="rounded-none"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="login_password"
+                  rules={[
+                    {
+                      required: true,
+                    },
+                  ]}
+                >
+                  <Input.Password
+                    placeholder="Login Password"
+                    size="large"
+                    className="rounded-none"
+                  />
+                </Form.Item>
+                {logReq ? (
+                  <button
+                    disabled
+                    className="bg-gray-400 w-full text-white font-semibold py-1 text-lg"
+                  >
+                    <span className="animate-spin block">
+                      <i className="ri-loader-3-line"></i>
+                    </span>
+                  </button>
+                ) : (
+                  <button className="bg-[#3F51B5] hover:bg-[#28346C] w-full text-white font-semibold py-1 duration-300 text-lg">
+                    NEXT
+                  </button>
+                )}
+              </div>
+            </Form>
+            <div className="mt-4 font-semibold">
+              <p>
+                <span>Don’t have an account? </span>
+                <button
+                  className="font-bold"
+                  onClick={() => setLoginForm(false)}
+                >
+                  Sign up
+                </button>
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div>
+            <Form onFinish={onSignup} autoComplete="off">
+              <p className="font-bold text-lg">Create an account</p>
+              <div className="mt-4 overflow-hidden">
+                <Form.Item
+                  name="fullname"
+                  rules={[
+                    {
+                      required: true,
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Name"
+                    size="large"
+                    className="rounded-none"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="email"
+                  rules={[
+                    {
+                      required: true,
+                      type: "email",
+                    },
+                  ]}
+                >
+                  <Input
+                    placeholder="Email Address"
+                    size="large"
+                    className="rounded-none"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="password"
+                  rules={[
+                    {
+                      required: true,
+                    },
+                  ]}
+                >
+                  <Input.Password
+                    placeholder="Password"
+                    size="large"
+                    className="rounded-none"
+                  />
+                </Form.Item>
+
+                <Form.Item
+                  name="mobile"
+                  rules={[
+                    {
+                      required: true,
+                      message: "Please input your Mobile number!",
+                    },
+                  ]}
+                >
+                  <Input
+                    prefix={phonePrefix}
+                    type="number"
+                    addonBefore={prefixSelector}
+                    style={{
+                      width: "100%",
+                    }}
+                    size="large"
+                    className="rounded-none"
+                  />
+                </Form.Item>
+
+                {signupReq ? (
+                  <button
+                    disabled
+                    className="bg-gray-400 w-full text-white font-semibold py-1 duration-300 text-lg"
+                  >
+                    <span className="animate-spin block">
+                      <i className="ri-loader-3-line"></i>
+                    </span>
+                  </button>
+                ) : (
+                  <button className="bg-[#3F51B5] hover:bg-[#28346C] w-full text-white font-semibold py-1 duration-300 text-lg">
+                    NEXT
+                  </button>
+                )}
+              </div>
+            </Form>
+            <div className="mt-4 font-semibold">
+              <p>
+                <span>Already have an account? </span>
+                <button
+                  className="font-bold"
+                  onClick={() => setLoginForm(true)}
+                >
+                  Log in
+                </button>
+              </p>
+            </div>
+          </div>
+        )}
+      </Modal>
     </>
   );
 };
