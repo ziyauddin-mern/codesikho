@@ -16,3 +16,7 @@
 .hover-line:hover::after {
   width: 100%;
 }
+
+.no-border-radius .ant-modal-content {
+  border-radius: 0 !important;
+}
